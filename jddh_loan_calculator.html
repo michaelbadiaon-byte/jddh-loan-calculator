@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JDDH Loan Calculator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      max-width: 900px;
+      width: 100%;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 20px;
+    }
+    
+    .header h1 {
+      color: #333;
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    
+    .header p {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .input-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    @media (max-width: 600px) {
+      .input-section {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .form-group label {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .form-group input {
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .card-label {
+      font-size: 13px;
+      opacity: 0.9;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+    
+    .card-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    
+    .schedule-section {
+      margin-top: 40px;
+    }
+    
+    .schedule-section h2 {
+      color: #333;
+      font-size: 18px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 10px;
+    }
+    
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    
+    table thead {
+      background-color: #f8f9fa;
+    }
+    
+    table th {
+      padding: 14px;
+      text-align: left;
+      font-weight: 600;
+      color: #333;
+      border-bottom: 2px solid #ddd;
+    }
+    
+    table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #eee;
+      color: #666;
+    }
+    
+    table tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    table td[align="right"] {
+      text-align: right;
+    }
+    
+    .footer-note {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #f0f7ff;
+      border-left: 4px solid #667eea;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .footer-note strong {
+      color: #667eea;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>JDDH Cash Loan Calculator</h1>
+      <p>Calculate your monthly payments and view the complete repayment schedule</p>
+    </div>
+    
+    <div class="input-section">
+      <div class="form-group">
+        <label for="loanAmount">Loan Amount (PHP)</label>
+        <input type="number" id="loanAmount" value="7000" min="100" step="100">
+      </div>
+      
+      <div class="form-group">
+        <label for="months">Number of Months to Pay</label>
+        <input type="number" id="months" value="3" min="1" max="60" step="1">
+      </div>
+    </div>
+    
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-label">Monthly Payment</div>
+        <div class="card-value" id="monthlyPayment">2,333.33</div>
+      </div>
+      
+      <div class="card">
+        <div class="card-label">Total Interest</div>
+        <div class="card-value" id="totalInterest">1,680.00</div>
+      </div>
+      
+      <div class="card">
+        <div class="card-label">Total Payable</div>
+        <div class="card-value" id="totalPayable">8,680.00</div>
+      </div>
+    </div>
+    
+    <div class="schedule-section">
+      <h2>Payment Schedule</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Payment #</th>
+              <th>Due Date</th>
+              <th align="right">Previous Balance</th>
+              <th align="right">Interest (12%)</th>
+              <th align="right">Principal</th>
+              <th align="right">Total Due</th>
+              <th align="right">Balance After</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleTable">
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div class="footer-note">
+      <strong>ℹ️ Important:</strong> This is a sample calculation only. Final loan terms, interest rates, and payment schedules may differ based on JDDH approval. Always confirm the exact terms in your loan agreement before committing to payments.
+    </div>
+  </div>
+  
+  <script>
+    const loanInput = document.getElementById('loanAmount');
+    const monthsInput = document.getElementById('months');
+    const monthlyPaymentEl = document.getElementById('monthlyPayment');
+    const totalInterestEl = document.getElementById('totalInterest');
+    const totalPayableEl = document.getElementById('totalPayable');
+    const scheduleTableEl = document.getElementById('scheduleTable');
+    
+    const MONTHLY_RATE = 0.12;
+    
+    function formatCurrency(num) {
+      return Math.round(num * 100) / 100;
+    }
+    
+    function formatDate(date) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = months[date.getMonth()];
+      return `${day}-${month}`;
+    }
+    
+    function calculateSchedule() {
+      const loanAmount = parseFloat(loanInput.value) || 0;
+      const months = parseInt(monthsInput.value) || 0;
+      
+      if (loanAmount <= 0 || months <= 0) {
+        scheduleTableEl.innerHTML = '';
+        monthlyPaymentEl.textContent = '0.00';
+        totalInterestEl.textContent = '0.00';
+        totalPayableEl.textContent = '0.00';
+        return;
+      }
+      
+      const monthlyPrincipal = formatCurrency(loanAmount / months);
+      
+      let currentBalance = loanAmount;
+      let totalInterest = 0;
+      let scheduleHTML = '';
+      
+      const today = new Date();
+      const firstDueDate = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+      
+      for (let i = 1; i <= months; i++) {
+        const previousBalance = currentBalance;
+        const interest = formatCurrency(previousBalance * MONTHLY_RATE);
+        const principal = monthlyPrincipal;
+        const totalDue = formatCurrency(interest + principal);
+        const balanceAfter = formatCurrency(currentBalance - principal);
+        
+        totalInterest += interest;
+        
+        const dueDate = new Date(firstDueDate.getFullYear(), firstDueDate.getMonth() + i - 1, firstDueDate.getDate());
+        const dueDateStr = formatDate(dueDate);
+        
+        scheduleHTML += `
+          <tr>
+            <td>${i}</td>
+            <td>${dueDateStr}</td>
+            <td align="right">₱ ${previousBalance.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td align="right">₱ ${interest.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td align="right">₱ ${principal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td align="right">₱ ${totalDue.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td align="right">₱ ${balanceAfter.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+          </tr>
+        `;
+        
+        currentBalance = balanceAfter;
+      }
+      
+      const totalPayable = formatCurrency(loanAmount + totalInterest);
+      
+      scheduleTableEl.innerHTML = scheduleHTML;
+      monthlyPaymentEl.textContent = monthlyPrincipal.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      totalInterestEl.textContent = formatCurrency(totalInterest).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      totalPayableEl.textContent = totalPayable.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+    
+    loanInput.addEventListener('input', calculateSchedule);
+    monthsInput.addEventListener('input', calculateSchedule);
+    
+    calculateSchedule();
+  </script>
+</body>
+</html>
