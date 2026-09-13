@@ -178,41 +178,41 @@
     .footer-note strong {
       color: #667eea;
     }
-  </style>
+  body{background:#071827;color:#f8fafc;font-family:Manrope,"Segoe UI",Arial,sans-serif;padding:16px;align-items:flex-start}.container{background:#071827;padding:24px;border:1px solid #243b50;border-radius:16px;box-shadow:none}.header{text-align:left;margin-bottom:24px;border-bottom:1px solid #243b50;padding-bottom:24px}.header .brand{color:#ff3e95;font-size:11px;font-weight:700;letter-spacing:1.4px;margin-bottom:12px}.header h1{color:#f8fafc;font-size:28px;letter-spacing:-.6px}.header p{color:#cbd5e1;line-height:1.6}.form-group label{color:#f8fafc}.form-group input{width:100%;min-width:0;background:#102a43;color:#f8fafc;border:1px solid #456078;border-radius:10px;min-height:48px;color-scheme:dark}.form-group input::placeholder{color:#9cabbc}.form-group input:focus{border-color:#ff3e95;box-shadow:0 0 0 3px #ff3e9526}.input-section{margin-bottom:12px}.input-hint{font-size:13px;color:#94a3b8;line-height:1.6;margin-bottom:24px}.summary-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:28px}.card{background:#102a43;border:1px solid #243b50;border-radius:12px;padding:20px 14px;text-align:left}.card-label{color:#cbd5e1;opacity:1}.card-value{color:#ff3e95;font-size:22px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.schedule-section{margin-top:24px}.schedule-section h2{color:#f8fafc;border-color:#243b50}.table-wrapper{border-color:#243b50}table{white-space:nowrap;font-variant-numeric:tabular-nums}table thead,table tr:hover{background:#102a43}table th{color:#f8fafc;border-color:#243b50}table td{color:#cbd5e1;border-color:#243b50}.footer-note{background:#102a43;border-left-color:#ff3e95;color:#cbd5e1}.footer-note strong{color:#ff3e95}@media(max-width:600px){body{padding:8px}.container{padding:20px 16px}.header h1{font-size:24px}.input-section{gap:16px}.summary-cards{grid-template-columns:1fr}.card{display:flex;justify-content:space-between;align-items:center;gap:12px}.card-label{margin:0}}</style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>JDDH Cash Loan Calculator</h1>
+      <p class="brand">JDDH TRAVEL AND BUSINESS SERVICES</p><h1>Cash Loan Calculator</h1>
       <p>Calculate your monthly payments and view the complete repayment schedule</p>
     </div>
     
     <div class="input-section">
       <div class="form-group">
         <label for="loanAmount">Loan Amount (PHP)</label>
-        <input type="number" id="loanAmount" value="7000" min="100" step="100">
+        <input type="number" id="loanAmount" placeholder="Enter loan amount" min="100" step="100">
       </div>
       
       <div class="form-group">
         <label for="months">Number of Months to Pay</label>
-        <input type="number" id="months" value="3" min="1" max="60" step="1">
+        <input type="number" id="months" placeholder="Enter number of months" min="1" max="60" step="1">
       </div>
     </div>
     
-    <div class="summary-cards">
+    <p class="input-hint">Enter your loan amount and repayment term to see the computation.</p><div class="summary-cards">
       <div class="card">
-        <div class="card-label">Monthly Payment</div>
-        <div class="card-value" id="monthlyPayment">2,333.33</div>
+        <div class="card-label">Monthly Principal</div>
+        <div class="card-value" id="monthlyPayment">—</div>
       </div>
       
       <div class="card">
         <div class="card-label">Total Interest</div>
-        <div class="card-value" id="totalInterest">1,680.00</div>
+        <div class="card-value" id="totalInterest">—</div>
       </div>
       
       <div class="card">
         <div class="card-label">Total Payable</div>
-        <div class="card-value" id="totalPayable">8,680.00</div>
+        <div class="card-value" id="totalPayable">—</div>
       </div>
     </div>
     
@@ -265,13 +265,13 @@
     
     function calculateSchedule() {
       const loanAmount = parseFloat(loanInput.value) || 0;
-      const months = parseInt(monthsInput.value) || 0;
+      const months = Number(monthsInput.value);
       
-      if (loanAmount <= 0 || months <= 0) {
+      if (!Number.isFinite(loanAmount) || loanAmount < 100 || !Number.isInteger(months) || months < 1 || months > 60) {
         scheduleTableEl.innerHTML = '';
-        monthlyPaymentEl.textContent = '0.00';
-        totalInterestEl.textContent = '0.00';
-        totalPayableEl.textContent = '0.00';
+        monthlyPaymentEl.textContent = '—';
+        totalInterestEl.textContent = '—';
+        totalPayableEl.textContent = '—';
         return;
       }
       
