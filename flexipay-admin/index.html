@@ -24,7 +24,8 @@
 <div class="content">
 <section class="view active" id="dashboard">
   <div class="hero"><div><h3>Welcome to JDDH Flexipay</h3><p>One admin dashboard for applications, offers, active loans, payments, and reports. This prototype is ready to connect to your existing Google Sheet and Apps Script backend.</p></div><div class="actions"><a class="btn btn-pink" target="_blank" href="https://tally.so/r/D4jKLj">Open Application Form</a><a class="btn btn-white" target="_blank" href="https://docs.google.com/spreadsheets/d/1Z9aORYjFMY00asbzhCS7Ueis8jKFKe7ODgylAmixA9U/edit">Open Live Workbook</a></div></div>
-  <div class="grid4"><div class="card metric"><div class="label">Applications</div><div class="value">12</div><div class="hint">4 need review</div></div><div class="card metric"><div class="label">Pending Offers</div><div class="value">3</div><div class="hint">Awaiting borrower action</div></div><div class="card metric"><div class="label">Active Loans</div><div class="value">7</div><div class="hint">₱485,000 principal</div></div><div class="card metric"><div class="label">Due Soon</div><div class="value">2</div><div class="hint">Within next 7 days</div></div></div>
+  <div class="grid4"><div class="card metric"><div class="label">Applications</div><div class="value" id="metricApplications">—</div><div class="hint">Live from Form responses</div></div><div class="card metric"><div class="label">Pending Offers</div><div class="value" id="metricPendingOffers">—</div><div class="hint">Awaiting borrower action</div></div><div class="card metric"><div class="label">Accepted Loans</div><div class="value" id="metricAcceptedLoans">—</div><div class="hint">Accepted loan offers</div></div><div class="card metric"><div class="label">Active Loans</div><div class="value" id="metricActiveLoans">—</div><div class="hint" id="metricPrincipal">Loading live principal…</div></div></div>
+  <div class="notice" id="liveStatus" style="margin:-6px 0 24px;background:#eef7ff;border-color:#cfe3ff;color:#234a73">Connecting to the live JDDH Flexipay summary…</div>
   <div class="section-grid"><div class="card"><div class="section-title"><h3>Recent Loan Activity</h3><span>Demo data only</span></div><div class="table-wrap"><table><thead><tr><th>Borrower</th><th>Amount</th><th>Term</th><th>Decision</th><th>Loan Status</th></tr></thead><tbody><tr><td>Sample Borrower A</td><td>₱200,000</td><td>12 mo</td><td><span class="status accepted">ACCEPTED</span></td><td><span class="status active">ACTIVE</span></td></tr><tr><td>Sample Borrower B</td><td>₱75,000</td><td>6 mo</td><td><span class="status offer">OFFER SENT</span></td><td><span class="status pending">PENDING</span></td></tr><tr><td>Sample Borrower C</td><td>₱50,000</td><td>3 mo</td><td><span class="status pending">FOR REVIEW</span></td><td><span class="status pending">PENDING</span></td></tr></tbody></table></div></div>
   <div class="card"><div class="section-title"><h3>Quick Links</h3></div><div class="quick-links"><a class="quick" target="_blank" href="https://tally.so/r/D4jKLj"><span><b>Loan Application</b><small>Public Tally form</small></span><b>→</b></a><a class="quick" target="_blank" href="https://tally.so/r/lbxkRv"><span><b>Offer Acceptance</b><small>Accept / decline form</small></span><b>→</b></a><a class="quick" target="_blank" href="https://michaelbadiaon-byte.github.io/jddh-loan-calculator/"><span><b>Loan Calculator</b><small>Current calculator</small></span><b>→</b></a><a class="quick" target="_blank" href="https://docs.google.com/spreadsheets/d/1Z9aORYjFMY00asbzhCS7Ueis8jKFKe7ODgylAmixA9U/edit"><span><b>Loan Workbook</b><small>Current source of truth</small></span><b>→</b></a></div></div></div>
 </section>
@@ -40,6 +41,35 @@ const names={dashboard:'Dashboard',applications:'Applications',loans:'Active Loa
 buttons.forEach(b=>b.onclick=()=>{buttons.forEach(x=>x.classList.remove('active'));b.classList.add('active');views.forEach(v=>v.classList.toggle('active',v.id===b.dataset.view));title.textContent=names[b.dataset.view]||'JDDH Flexipay';window.scrollTo(0,0)});
 const search=document.getElementById('search'),filter=document.getElementById('filter');function f(){const q=(search.value||'').toLowerCase(),s=filter.value;document.querySelectorAll('#apps tbody tr').forEach(r=>r.style.display=(r.textContent.toLowerCase().includes(q)&&(s==='all'||r.dataset.status===s))?'':'none')}search?.addEventListener('input',f);filter?.addEventListener('change',f);
 document.querySelectorAll('.demo').forEach(b=>b.onclick=()=>alert('Prototype only. This action will be connected to the secured Apps Script API in the production version.'));
+
+const DASHBOARD_API='https://script.google.com/macros/s/AKfycbwO742zBzc7F3YQYCcFaWJThMtFy9R4e850W-IJYS9SMLte7S10BG_IGzhb7ExjVqx8/exec';
+const peso=new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:0});
+function setText(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
+async function loadLiveSummary(){
+  const status=document.getElementById('liveStatus');
+  try{
+    const sep=DASHBOARD_API.includes('?')?'&':'?';
+    const res=await fetch(DASHBOARD_API+sep+'v='+Date.now(),{method:'GET',cache:'no-store',credentials:'omit'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const payload=await res.json();
+    if(!payload || payload.ok!==true || !payload.data) throw new Error(payload?.error||'Invalid API response');
+    const d=payload.data;
+    setText('metricApplications',Number(d.applications||0).toLocaleString());
+    setText('metricPendingOffers',Number(d.pendingOffers||0).toLocaleString());
+    setText('metricAcceptedLoans',Number(d.acceptedLoans||0).toLocaleString());
+    setText('metricActiveLoans',Number(d.activeLoans||0).toLocaleString());
+    setText('metricPrincipal',peso.format(Number(d.totalActivePrincipal||0))+' active principal');
+    const when=payload.updatedAt?new Date(payload.updatedAt):new Date();
+    status.textContent='LIVE SUMMARY CONNECTED • Last refreshed '+when.toLocaleString('en-PH',{timeZone:'Asia/Manila'});
+    status.style.background='#edf9f0';status.style.borderColor='#bfe7c8';status.style.color='#126b2d';
+  }catch(err){
+    console.error('JDDH live summary error:',err);
+    status.textContent='Live summary could not load in this browser. The dashboard remains read-only; no sheet data was changed.';
+    status.style.background='#fff8eb';status.style.borderColor='#f7d79b';status.style.color='#7a4b00';
+  }
+}
+loadLiveSummary();
+setInterval(loadLiveSummary,60000);
 </script>
 </body>
 </html>
